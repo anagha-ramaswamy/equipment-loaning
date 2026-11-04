@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 
 interface TextInputListProps {
     onChange: (val: string[]) => void;
+    initialValues?: string[];
 
     label: string;
     inputID: string;
@@ -21,12 +22,13 @@ interface ItemState {
     id: number;  // auto-incrementing int id for idempotency in deletion
 }
 
-export default function TextInputList({ onChange, label, inputID, isRequired, addButtonLabel }: TextInputListProps) {
-    // For simplicity, initial values are not supported (i.e. values starts as an empty list);
-    // thus, this component is write-only
+export default function TextInputList({ onChange, initialValues = [], label, inputID, isRequired, addButtonLabel }: TextInputListProps) {
+    // `initialValues` is only read on mount; afterwards this component owns its state
 
-    const nextIDRef = useRef(0);
-    const [items, setItems] = useState<ItemState[]>([]);
+    const nextIDRef = useRef(initialValues.length);
+    const [items, setItems] = useState<ItemState[]>(() =>
+        initialValues.map((value, id) => ({ value, id }))
+    );
 
     useEffect(() => {
         onChange(items.map(item => item.value));
